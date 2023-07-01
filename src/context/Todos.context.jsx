@@ -1,6 +1,6 @@
 import { createContext, useContext, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
-import data from '../data';
+import todosService from '../services/todos.service';
 
 export const TodosContext = createContext();
 export const useTodosContext = () => {
@@ -15,14 +15,46 @@ export const useTodosContext = () => {
 };
 
 function TodosContextProvider({ children }) {
-	const [todos, setTodos] = useState(data);
+	const [todos, setTodos] = useState([]);
 	const [activeTodo, setActiveTodo] = useState({});
 	const memoized = useRef({
-		selectTodo,
+		loadTodos,
 	});
 
-	function selectTodo(id) {
-		setActiveTodo(todos.find((o) => o.id === id));
+	function selectActiveTodo(id) {
+		const todoFound = todos.find((o) => o.id === id);
+		setActiveTodo(todoFound || {});
+	}
+
+	function deselectActiveTodo() {
+		setActiveTodo({});
+	}
+
+	function addTodo(data) {
+		const { uid, ...restdata } = data;
+		const todos = todosService.add(uid, restdata);
+		setTodos(todos);
+	}
+
+	function updateTodo(data) {
+		const { uid, ...restData } = data;
+		const todos = todosService.update(uid, restData);
+		setTodos(todos);
+	}
+
+	function deleteTodo(uid, id) {
+		const todos = todosService.remove(uid, id);
+		setTodos(todos);
+	}
+
+	function toggleCompleteTodo({ uid, id, completed } = {}) {
+		const todos = todosService.update(uid, { id, completed });
+		setTodos(todos);
+	}
+
+	function loadTodos(uid) {
+		const todos = todosService.get(uid);
+		setTodos(todos);
 	}
 
 	return (
@@ -30,6 +62,12 @@ function TodosContextProvider({ children }) {
 			value={{
 				todos,
 				activeTodo,
+				selectActiveTodo,
+				deselectActiveTodo,
+				addTodo,
+				toggleCompleteTodo,
+				updateTodo,
+				deleteTodo,
 				...memoized.current,
 			}}
 		>
@@ -39,7 +77,7 @@ function TodosContextProvider({ children }) {
 }
 
 TodosContextProvider.propTypes = {
-	children: PropTypes.any.isRequired,
+	children: PropTypes.node.isRequired,
 };
 
 export default TodosContextProvider;

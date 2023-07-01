@@ -3,9 +3,10 @@ import { getClassName } from '../../utils';
 
 function Icon({ size, inline, className, children }) {
 	const sizes = {
-		md: 'icon--md',
-		lg: 'icon--lg',
-		xl: 'icon--xl',
+		'md': 'icon--md',
+		'lg': 'icon--lg',
+		'xl': 'icon--xl',
+		'display-3': 'icon--display-3',
 	};
 	const iconClassname = getClassName(
 		'icon',
@@ -18,7 +19,7 @@ function Icon({ size, inline, className, children }) {
 }
 
 Icon.propTypes = {
-	size: PropTypes.oneOf(['md', 'lg', 'xl']),
+	size: PropTypes.oneOf(['md', 'lg', 'xl', 'display-3']),
 	inline: PropTypes.bool,
 	className: PropTypes.string,
 	children: PropTypes.node.isRequired,

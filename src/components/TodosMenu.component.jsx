@@ -8,7 +8,7 @@ import Accordion, {
 	AccordionBody,
 } from './common/Accordion.component';
 import { OptionsIcon, SortIcon } from '../icons';
-import { getClassName } from '../utils';
+import { getClassName, setTestid } from '../utils';
 
 function TodosMenu({ userList }) {
 	const [isVisible, setIsVisible] = useState(false);
@@ -22,12 +22,21 @@ function TodosMenu({ userList }) {
 
 	return (
 		<>
-			<Button clickHandler={handleMenuToggle} toggle type='button'>
+			<Button
+				onClick={handleMenuToggle}
+				toggle
+				type='button'
+				{...setTestid('menu-toggler')}
+			>
 				<Icon size='md' inline>
 					<OptionsIcon />
 				</Icon>
 			</Button>
-			<div className={menuClassname}>
+			<div
+				hidden={!isVisible}
+				className={menuClassname}
+				{...setTestid('todos-menu')}
+			>
 				<Accordion className='accordion--menu'>
 					{userList && (
 						<AccordionItem id={1} single>

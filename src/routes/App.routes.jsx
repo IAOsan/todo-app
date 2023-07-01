@@ -1,19 +1,31 @@
 import { useRoutes, Navigate } from 'react-router-dom';
 import Pages from '../pages';
+import PrivateRoute from './Private.route';
+import PublicRoute from './Public.route';
 
 function AppRoutes() {
 	const routes = useRoutes([
 		{
-			path: '/',
-			element: <Navigate to='/todos/today' replace />,
+			element: <PrivateRoute />,
+			children: [
+				{
+					path: '/todos/:tag',
+					element: <Pages.Home />,
+				},
+				{
+					path: '*',
+					element: <Navigate to='/todos/today' />,
+				},
+			],
 		},
 		{
-			path: '/todos/*',
-			element: <Pages.Home />,
-		},
-		{
-			path: '/auth',
-			element: <Pages.Auth />,
+			element: <PublicRoute />,
+			children: [
+				{
+					path: '/auth',
+					element: <Pages.Auth />,
+				},
+			],
 		},
 	]);
 

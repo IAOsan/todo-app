@@ -13,3 +13,6 @@ export { ReactComponent as TrashIcon } from './assets/trash-icon.svg';
 export { ReactComponent as RightArrowIcon } from './assets/right-arrow-icon.svg';
 export { ReactComponent as EditIcon } from './assets/edit-icon.svg';
 export { ReactComponent as InfiniteIcon } from './assets/infinite-icon.svg';
+export { ReactComponent as SaveIcon } from './assets/save-icon.svg';
+export { ReactComponent as EmptyIcon } from './assets/empty-icon.svg';
+export { ReactComponent as LogoutIcon } from './assets/logout-icon.svg';

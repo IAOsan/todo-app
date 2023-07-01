@@ -1,41 +1,49 @@
 import { useRef, useLayoutEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import PropTypes from 'prop-types';
 import TodosHeader from './TodosHeader.component';
 import TodosRibbon from './TodosRibbon.component';
 import Icon from './common/Icon.component';
 import SidebarToggler from './SidebarToggler.component';
-import TodosMenu from './TodosMenu.component';
 import TodosList from './TodosList.component';
 import TodosItem from './TodosItem.component';
 import NewTodoForm from './NewTodoForm.component';
 import { useAppContext } from '../context/App.context';
-import { useListsContext } from '../context/Lists.context';
 import { useTodosContext } from '../context/Todos.context';
-import { getClassName, accessibleOnClick } from '../utils';
-import { InfiniteIcon, StarIcon, SunIcon } from '../icons';
+import { useListsContext } from '../context/Lists.context';
+import { getClassName, accessibleOnClick, capitalize } from '../utils';
+import { EmptyIcon } from '../icons';
 
-function Todos() {
-	const { isEditModeActive, handleEditModeToggle } = useAppContext();
+function Todos({ icons, todosList }) {
+	const { isEditModeActive, toggleEditMode, user } = useAppContext();
+	const { activeTodo, selectActiveTodo, toggleCompleteTodo } =
+		useTodosContext();
 	const { activeList } = useListsContext();
-	const { todos, activeTodo, selectTodo } = useTodosContext();
+	const { tag } = useParams();
+	const filteredTodos = todosList[tag];
 	const headerRef = useRef();
 	const listRef = useRef();
-	const icons = {
-		sun: <SunIcon />,
-		star: <StarIcon />,
-		infinite: <InfiniteIcon />,
-	};
 
 	useLayoutEffect(() => {
+		if (!headerRef.current || !listRef.current) return;
+
 		const headerHeight = headerRef.current.offsetHeight;
 		// 104 = space + form + space
 		const offsetHeight = (headerHeight + 104) / 10 + 'rem';
-
 		listRef.current.style = `--listHeight: calc(100vh - ${offsetHeight})`;
 	}, [activeList]);
 
 	function handleItemClick(id) {
-		selectTodo(id);
-		handleEditModeToggle();
+		selectActiveTodo(id);
+		toggleEditMode();
+	}
+
+	function handleToggleComplete(id, completed) {
+		toggleCompleteTodo({
+			uid: user.uid,
+			id,
+			completed: completed,
+		});
 	}
 
 	return (
@@ -47,7 +55,6 @@ function Todos() {
 			<TodosHeader variant={activeList.theme} ref={headerRef}>
 				<TodosRibbon>
 					<SidebarToggler />
-					<TodosMenu />
 				</TodosRibbon>
 				<h1
 					className={getClassName('h3', {
@@ -59,28 +66,49 @@ function Todos() {
 							{icons[activeList.icon]}
 						</Icon>
 					)}
-					{activeList.label}
+					{activeList.label && capitalize(activeList.label)}
 				</h1>
 				{activeList.displayDate && (
 					<p className='h5'>Thursday, September 28</p>
 				)}
 			</TodosHeader>
-			{/* TODO agregar una clase activa al item cuando se este editando */}
-			{/* TODO eliminar la clase activa cuando se cierra el formulario de edicion */}
 			<TodosList ref={listRef}>
-				{todos.map((o) => (
-					<TodosItem
-						key={o.id}
-						{...accessibleOnClick(() => handleItemClick(o.id))}
-						description={o.description}
-						metadata={{ origin: 'Today' }}
-						active={activeTodo.id === o.id}
-					/>
-				))}
+				{!filteredTodos.length ? (
+					<li className='h-100 w-80 mx-auto flex flex-column flex-ai-c flex-jc-c text-center color-light-800'>
+						<Icon size='display-3'>
+							<EmptyIcon />
+						</Icon>
+						<p className='h3'>
+							<b>No todos yet</b>
+						</p>
+						<p>
+							it looks like it&apos;s empty, new tasks you add
+							will appear here
+						</p>
+					</li>
+				) : (
+					filteredTodos.map((o) => (
+						<TodosItem
+							key={o.id}
+							{...accessibleOnClick(() => handleItemClick(o.id))}
+							id={o.id}
+							description={o.description}
+							completed={o.completed}
+							active={activeTodo.id === o.id}
+							today={o.today}
+							onToggleComplete={handleToggleComplete}
+						/>
+					))
+				)}
 			</TodosList>
 			<NewTodoForm variant={activeList.theme} />
 		</section>
 	);
 }
+
+Todos.propTypes = {
+	icons: PropTypes.object.isRequired,
+	todosList: PropTypes.object.isRequired,
+};
 
 export default Todos;

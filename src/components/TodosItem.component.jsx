@@ -1,42 +1,64 @@
 import PropTypes from 'prop-types';
-import { StarFilledIcon, StarIcon } from '../icons';
-import { getClassName } from '../utils';
+import { getClassName, setTestid } from '../utils';
 
-function TodosItem({ description, metadata, active, ...restProps }) {
+function TodosItem({
+	id,
+	description,
+	completed,
+	active,
+	today,
+	onToggleComplete,
+	...restProps
+}) {
+	function getMetadata() {
+		return `${today ? 'Today' : ''}`;
+	}
+
 	return (
 		<li
+			{...setTestid('todositem')}
 			{...restProps}
 			className={getClassName('todos__item', { active: active })}
 		>
 			<form className='flex flex-ai-c'>
-				<label className='form__checkbox form__checkbox--todos mr-20'>
-					<input type='checkbox' name='checked' />
+				<label
+					className='form__checkbox form__checkbox--todos mr-20'
+					{...setTestid('todoitem-check')}
+				>
+					<input
+						onChange={() => onToggleComplete(id, !completed)}
+						{...setTestid('todoitem-check-element')}
+						type='checkbox'
+						name='checked'
+						checked={completed}
+					/>
 					<div className='form__checkbox-checkmark'></div>
 				</label>
 				<div>
-					<p className='h5'>{description}</p>
-					<small className='color-light-800'>{metadata.origin}</small>
+					{completed ? (
+						<s className='h5 display-block'>{description}</s>
+					) : (
+						<p className='h5'>{description}</p>
+					)}
+					<small
+						{...setTestid('todositem-metadata')}
+						className='color-light-800'
+					>
+						{getMetadata()}
+					</small>
 				</div>
-				<label className='todos__important-mark ml-auto'>
-					<input type='checkbox' name='important' />
-					<span className='icon icon--xl'>
-						<StarFilledIcon />
-					</span>
-					<span className='icon icon--xl'>
-						<StarIcon />
-					</span>
-				</label>
 			</form>
 		</li>
 	);
 }
 
 TodosItem.propTypes = {
+	active: PropTypes.bool.isRequired,
+	completed: PropTypes.bool.isRequired,
 	description: PropTypes.string.isRequired,
-	metadata: PropTypes.shape({
-		origin: PropTypes.string.isRequired,
-	}).isRequired,
-	active: PropTypes.bool,
+	id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+	onToggleComplete: PropTypes.func.isRequired,
+	today: PropTypes.bool.isRequired,
 };
 
 export default TodosItem;

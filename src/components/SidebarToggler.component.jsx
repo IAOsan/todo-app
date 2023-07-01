@@ -2,16 +2,18 @@ import { MenuIcon } from '../icons';
 import Button from './common/Button.component';
 import Icon from './common/Icon.component';
 import { useAppContext } from '../context/App.context';
+import { setTestid } from '../utils';
 
 function SidebarToggler() {
-	const { handleSidebarToggle } = useAppContext();
+	const { toggleSidebar } = useAppContext();
 
 	return (
 		<Button
-			clickHandler={handleSidebarToggle}
+			onClick={toggleSidebar}
 			toggle
 			className='d-md-none'
 			type='button'
+			{...setTestid('sidebar-toggler')}
 		>
 			<Icon size='md' inline>
 				<MenuIcon />

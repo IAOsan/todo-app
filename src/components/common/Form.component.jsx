@@ -2,9 +2,12 @@ import PropTypes from 'prop-types';
 import Icon from './Icon.component';
 import { getClassName } from '../../utils';
 
-function Form({ className, children }) {
+function Form({ className, children, ...restProps }) {
 	return (
-		<form className={getClassName('form', { [className]: className })}>
+		<form
+			className={getClassName('form', { [className]: className })}
+			{...restProps}
+		>
 			{children}
 		</form>
 	);
@@ -45,7 +48,7 @@ export function FormFeedback({ variant, className, message }) {
 		invalid: 'form__feedback--invalid',
 	};
 
-	return (
+	return message ? (
 		<small
 			className={getClassName(
 				'form__feedback',
@@ -55,7 +58,7 @@ export function FormFeedback({ variant, className, message }) {
 		>
 			{message}
 		</small>
-	);
+	) : null;
 }
 
 export function FormOption({
@@ -110,6 +113,18 @@ export function FormFooter({ className, children }) {
 	);
 }
 
+export function FormContent({ className, children }) {
+	return (
+		<footer
+			className={getClassName('form__content', {
+				[className]: className,
+			})}
+		>
+			{children}
+		</footer>
+	);
+}
+
 Form.propTypes = {
 	className: PropTypes.string,
 	children: PropTypes.node.isRequired,
@@ -130,7 +145,7 @@ FormControl.propTypes = {
 FormFeedback.propTypes = {
 	variant: PropTypes.oneOf(['valid', 'invalid']).isRequired,
 	className: PropTypes.string,
-	message: PropTypes.string.isRequired,
+	message: PropTypes.string,
 };
 
 FormOption.propTypes = {
@@ -147,6 +162,11 @@ FormPrompt.propTypes = {
 };
 
 FormFooter.propTypes = {
+	className: PropTypes.string,
+	children: PropTypes.node.isRequired,
+};
+
+FormContent.propTypes = {
 	className: PropTypes.string,
 	children: PropTypes.node.isRequired,
 };

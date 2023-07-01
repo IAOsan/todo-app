@@ -1,5 +1,6 @@
 import { createContext, useContext, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
+import authService from '../services/auth.service';
 
 export const AppContext = createContext();
 export const useAppContext = () => {
@@ -16,16 +17,38 @@ export const useAppContext = () => {
 function AppContextProvider({ children }) {
 	const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 	const [isEditModeActive, setIsEditModeActive] = useState(false);
+	const [user, setUser] = useState(null);
 	const memoized = useRef({
 		initialList: 'Today',
+		register,
+		loginUser,
 	});
 
-	function handleSidebarToggle() {
+	function toggleSidebar() {
 		setIsSidebarOpen((prevState) => !prevState);
 	}
 
-	function handleEditModeToggle() {
+	function toggleEditMode() {
 		setIsEditModeActive((prevState) => !prevState);
+	}
+
+	function register(credentials) {
+		const user = authService.registerWithEmail(credentials);
+		loginUser(user);
+	}
+
+	function login(credentials) {
+		const user = authService.loginWithEmail(credentials);
+		loginUser(user);
+	}
+
+	function loginUser(user) {
+		setUser(user);
+	}
+
+	function logOut() {
+		setUser(null);
+		authService.logOut();
 	}
 
 	return (
@@ -33,8 +56,12 @@ function AppContextProvider({ children }) {
 			value={{
 				isSidebarOpen,
 				isEditModeActive,
-				handleSidebarToggle,
-				handleEditModeToggle,
+				toggleSidebar,
+				toggleEditMode,
+				user,
+				isAuth: !!user,
+				login,
+				logOut,
 				...memoized.current,
 			}}
 		>
@@ -44,7 +71,7 @@ function AppContextProvider({ children }) {
 }
 
 AppContextProvider.propTypes = {
-	children: PropTypes.any.isRequired,
+	children: PropTypes.node.isRequired,
 };
 
 export default AppContextProvider;

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import SignInForm from '../components/SignInForm.component';
 import SignUpForm from '../components/SignUpForm.component';
-import { getClassName } from '../utils';
+import { getClassName, setTestid } from '../utils';
 
 function Auth() {
 	const [isFirstColumnVisible, setIsFirstColumnVisible] = useState(true);
@@ -12,7 +12,10 @@ function Auth() {
 	}
 
 	return (
-		<main className='auth-page flex flex-ai-c flex-jc-c'>
+		<main
+			className='auth-page flex flex-ai-c flex-jc-c'
+			{...setTestid('auth-page')}
+		>
 			<div className='auth-page__content'>
 				<div
 					className={getClassName('auth-page__col', {

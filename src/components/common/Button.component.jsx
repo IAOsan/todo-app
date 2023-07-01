@@ -12,8 +12,10 @@ function Button({
 	...restProps
 }) {
 	const variants = {
-		info: 'button--info',
-		light: 'button--light',
+		'info': 'button--info',
+		'success': 'button--success',
+		'text-danger': 'button--text-danger',
+		'text': 'button--text',
 	};
 	const classNames = getClassName(
 		'button',
@@ -32,7 +34,7 @@ function Button({
 }
 
 Button.propTypes = {
-	variant: PropTypes.oneOf(['info', 'light']),
+	variant: PropTypes.oneOf(['info', 'text', 'success', 'text-danger']),
 	block: PropTypes.bool,
 	rounded: PropTypes.bool,
 	toggle: PropTypes.bool,

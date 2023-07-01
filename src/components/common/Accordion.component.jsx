@@ -80,7 +80,7 @@ export function AccordionItem({
 export function AccordionHeader({ className, clickHandler, children }) {
 	return (
 		<Button
-			clickHandler={clickHandler}
+			onClick={clickHandler}
 			className={getClassName('button--accordion', {
 				[className]: className,
 			})}

@@ -16,19 +16,13 @@ export const useListsContext = () => {
 function ListsContextProvider({ children }) {
 	const [lists, setLists] = useState([
 		{
-			label: 'Today',
+			label: 'today',
 			theme: 'primary',
 			icon: 'sun',
 			displayDate: true,
 		},
 		{
-			label: 'Important',
-			theme: 'warning',
-			icon: 'star',
-			displayIcon: true,
-		},
-		{
-			label: 'All',
+			label: 'all',
 			theme: 'secondary',
 			icon: 'infinite',
 			displayIcon: true,
@@ -40,7 +34,10 @@ function ListsContextProvider({ children }) {
 	});
 
 	function selectList(label) {
-		setActiveList(lists.find((o) => o.label === label));
+		const selectedList = lists.find(
+			(o) => o.label.toLowerCase() === label.toLowerCase()
+		);
+		setActiveList((prevState) => selectedList || prevState);
 	}
 
 	return (
@@ -57,7 +54,7 @@ function ListsContextProvider({ children }) {
 }
 
 ListsContextProvider.propTypes = {
-	children: PropTypes.any.isRequired,
+	children: PropTypes.node.isRequired,
 };
 
 export default ListsContextProvider;

@@ -1,36 +1,35 @@
 import { useNavigate } from 'react-router-dom';
+import PropTypes from 'prop-types';
 import UserProfileCard from './UserProfileCard.component.jsx';
 import Nav, { NavItem, NavList, NavLink } from './common/Nav.component';
-import Icon from './common/Icon.component';
 import { useAppContext } from '../context/App.context';
 import { useListsContext } from '../context/Lists.context.jsx';
-import { getClassName, capitalize } from '../utils';
-import { SunIcon, StarIcon, InfiniteIcon } from '../icons.js';
+import { getClassName, capitalize, setTestid } from '../utils';
+import Icon from './common/Icon.component';
 
-function Sidebar() {
-	const navigate = useNavigate();
-	const { isSidebarOpen, handleSidebarToggle } = useAppContext();
+function Sidebar({ icons, todosList }) {
+	const { isSidebarOpen, toggleSidebar } = useAppContext();
 	const { lists, selectList } = useListsContext();
-	const icons = {
-		sun: <SunIcon />,
-		star: <StarIcon />,
-		infinite: <InfiniteIcon />,
-	};
+	const navigate = useNavigate();
 
 	function handleLinkClick(e, label) {
 		e.preventDefault();
 
 		navigate(e.target.pathname);
 		selectList(label);
-		handleSidebarToggle();
+		toggleSidebar();
 	}
 
 	return (
-		<aside className={getClassName('sidebar', { active: isSidebarOpen })}>
+		<aside
+			{...setTestid('sidebar')}
+			className={getClassName('sidebar', { active: isSidebarOpen })}
+		>
 			<div className='sidebar__content'>
 				<header className='sidebar__header'>
 					<UserProfileCard />
 				</header>
+				<hr />
 				<Nav className='sidenav'>
 					<NavList>
 						{lists.map((o) => (
@@ -49,8 +48,11 @@ function Sidebar() {
 										{icons[o.icon]}
 									</Icon>
 									{capitalize(o.label)}
-									<span className='ml-auto color-light-800'>
-										8
+									<span
+										{...setTestid(`todos-count-${o.label}`)}
+										className='ml-auto color-light-800'
+									>
+										{todosList[o.label].length}
 									</span>
 								</NavLink>
 							</NavItem>
@@ -61,5 +63,10 @@ function Sidebar() {
 		</aside>
 	);
 }
+
+Sidebar.propTypes = {
+	icons: PropTypes.object.isRequired,
+	todosList: PropTypes.object.isRequired,
+};
 
 export default Sidebar;
