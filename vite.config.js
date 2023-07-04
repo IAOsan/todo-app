@@ -15,4 +15,7 @@ export default defineConfig({
 		reporters: 'verbose',
 		root: './',
 	},
+	build: {
+		outDir: 'docs',
+	},
 });
