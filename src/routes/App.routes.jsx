@@ -12,10 +12,6 @@ function AppRoutes() {
 					path: '/todos/:tag',
 					element: <Pages.Home />,
 				},
-				{
-					path: '*',
-					element: <Navigate to='/todos/today' />,
-				},
 			],
 		},
 		{
@@ -26,6 +22,10 @@ function AppRoutes() {
 					element: <Pages.Auth />,
 				},
 			],
+		},
+		{
+			path: '/*',
+			element: <Navigate to='/todos/today' />,
 		},
 	]);
 

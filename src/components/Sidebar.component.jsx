@@ -12,10 +12,13 @@ function Sidebar({ icons, todosList }) {
 	const { lists, selectList } = useListsContext();
 	const navigate = useNavigate();
 
-	function handleLinkClick(e, label) {
+	function handleLinkClick(e) {
 		e.preventDefault();
+		const { label, path } = e.target.dataset;
 
-		navigate(e.target.pathname);
+		if (!label || !path) return;
+
+		navigate(path);
 		selectList(label);
 		toggleSidebar();
 	}
@@ -35,8 +38,10 @@ function Sidebar({ icons, todosList }) {
 						{lists.map((o) => (
 							<NavItem key={o.label} className='sidenav__item'>
 								<NavLink
-									onClick={(e) => handleLinkClick(e, o.label)}
+									onClick={handleLinkClick}
 									to={`/todos/${o.label}`}
+									data-path={`/todos/${o.label}`}
+									data-label={o.label}
 									className={({ isActive }) =>
 										getClassName(
 											'sidenav__link h5 flex flex-ai-c',

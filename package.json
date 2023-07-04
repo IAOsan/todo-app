@@ -10,7 +10,7 @@
 		"lint": "eslint src --ext js,jsx --report-unused-disable-directives --max-warnings 0",
 		"preview": "vite preview",
 		"test": "vitest",
-		"start": "browser-sync start --server 'dist' --files 'dist' --no-open"
+		"start": "browser-sync start --server 'docs' --files 'docs' --no-open"
 	},
 	"dependencies": {
 		"bcryptjs": "2.4.3",
