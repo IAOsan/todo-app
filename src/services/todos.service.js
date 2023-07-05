@@ -35,24 +35,37 @@ function get(uid) {
 	if (!allTodos[uid]) return [];
 
 	const today = new Date().toDateString();
-	return allTodos[uid].map((o) => {
+	const updatedTodos = allTodos[uid].map((o) => {
 		if (o.today) {
-			o.today = new Date(o.creationDate).toDateString() === today;
+			const crDate = new Date(o.creationDate).toDateString();
+			const modDate = new Date(o.lastUpdate).toDateString();
+			o.today = crDate === today || (o.today && modDate === today);
 			return o;
 		}
 		return o;
 	});
+
+	allTodos[uid] = updatedTodos;
+
+	storageService.setItem(todosKey, allTodos);
+
+	return updatedTodos;
 }
 
 function update(uid, data) {
 	const { id, ...restData } = data;
 	const allTodos = storageService.getItem(todosKey, defaultValue);
 	const updatedTodos =
-		allTodos[uid]?.map((o) => (o.id === id ? { ...o, ...restData } : o)) ||
-		[];
+		allTodos[uid]?.map((o) =>
+			o.id === id
+				? { ...o, ...restData, lastUpdate: new Date().toISOString() }
+				: o
+		) || [];
 
 	allTodos[uid] = updatedTodos;
 	storageService.setItem(todosKey, allTodos);
+
+	console.log(allTodos);
 
 	return updatedTodos;
 }
