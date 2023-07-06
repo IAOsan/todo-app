@@ -65,8 +65,6 @@ function update(uid, data) {
 	allTodos[uid] = updatedTodos;
 	storageService.setItem(todosKey, allTodos);
 
-	console.log(allTodos);
-
 	return updatedTodos;
 }
 

@@ -69,7 +69,13 @@ function Todos({ icons, todosList }) {
 					{activeList.label && capitalize(activeList.label)}
 				</h1>
 				{activeList.displayDate && (
-					<p className='h5'>Thursday, September 28</p>
+					<p className='h5'>
+						{new Date().toLocaleString('en-US', {
+							weekday: 'long',
+							month: 'long',
+							day: 'numeric',
+						})}
+					</p>
 				)}
 			</TodosHeader>
 			<TodosList ref={listRef}>

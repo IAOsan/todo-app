@@ -271,6 +271,14 @@ describe('<App />', () => {
 					screen.queryByRole('heading', { name: /today/i })
 				).toBeInTheDocument();
 			});
+
+			it('should display current date in the route /todos/today', async () => {
+				renderApp({ entries: ['/todos/all'] });
+
+				expect(
+					screen.queryByText(/monday. january 30/i)
+				).toBeInTheDocument();
+			});
 		});
 
 		describe('ADD TODOS', () => {
