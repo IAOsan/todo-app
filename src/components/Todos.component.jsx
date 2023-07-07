@@ -16,8 +16,12 @@ import { EmptyIcon } from '../icons';
 
 function Todos({ icons, todosList }) {
 	const { isEditModeActive, toggleEditMode, user } = useAppContext();
-	const { activeTodo, selectActiveTodo, toggleCompleteTodo } =
-		useTodosContext();
+	const {
+		activeTodo,
+		selectActiveTodo,
+		toggleCompleteTodo,
+		toggleImportantTodo,
+	} = useTodosContext();
 	const { activeList } = useListsContext();
 	const { tag } = useParams();
 	const filteredTodos = todosList[tag];
@@ -42,7 +46,16 @@ function Todos({ icons, todosList }) {
 		toggleCompleteTodo({
 			uid: user.uid,
 			id,
-			completed: completed,
+			// completed: completed,
+			completed,
+		});
+	}
+
+	function handleToggleImportant(id, important) {
+		toggleImportantTodo({
+			uid: user.uid,
+			id,
+			important,
 		});
 	}
 
@@ -102,7 +115,9 @@ function Todos({ icons, todosList }) {
 							completed={o.completed}
 							active={activeTodo.id === o.id}
 							today={o.today}
+							important={o.important}
 							onToggleComplete={handleToggleComplete}
+							onToggleImportant={handleToggleImportant}
 						/>
 					))
 				)}

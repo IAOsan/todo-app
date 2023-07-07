@@ -1,5 +1,6 @@
 import { createContext, useContext, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
+import { toast } from 'react-toastify';
 import todosService from '../services/todos.service';
 
 export const TodosContext = createContext();
@@ -34,21 +35,29 @@ function TodosContextProvider({ children }) {
 		const { uid, ...restdata } = data;
 		const todos = todosService.add(uid, restdata);
 		setTodos(todos);
+		toast.success('Todo added');
 	}
 
 	function updateTodo(data) {
 		const { uid, ...restData } = data;
 		const todos = todosService.update(uid, restData);
 		setTodos(todos);
+		toast.success('Todo updated');
 	}
 
 	function deleteTodo(uid, id) {
 		const todos = todosService.remove(uid, id);
 		setTodos(todos);
+		toast.success('Todo deleted successfully');
 	}
 
 	function toggleCompleteTodo({ uid, id, completed } = {}) {
 		const todos = todosService.update(uid, { id, completed });
+		setTodos(todos);
+	}
+
+	function toggleImportantTodo({ uid, id, important } = {}) {
+		const todos = todosService.update(uid, { id, important });
 		setTodos(todos);
 	}
 
@@ -66,6 +75,7 @@ function TodosContextProvider({ children }) {
 				deselectActiveTodo,
 				addTodo,
 				toggleCompleteTodo,
+				toggleImportantTodo,
 				updateTodo,
 				deleteTodo,
 				...memoized.current,

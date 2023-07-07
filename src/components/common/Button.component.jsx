@@ -3,6 +3,7 @@ import { getClassName } from '../../utils';
 
 function Button({
 	variant,
+	size,
 	block,
 	rounded,
 	toggle,
@@ -17,9 +18,13 @@ function Button({
 		'text-danger': 'button--text-danger',
 		'text': 'button--text',
 	};
+	const sizes = {
+		sm: 'button--sm',
+	};
 	const classNames = getClassName(
 		'button',
 		{ [variants[variant]]: variant },
+		{ [sizes[size]]: size },
 		{ 'button--block': block },
 		{ 'button--rounded': rounded },
 		{ 'button--toggle': toggle },
@@ -35,6 +40,7 @@ function Button({
 
 Button.propTypes = {
 	variant: PropTypes.oneOf(['info', 'text', 'success', 'text-danger']),
+	size: PropTypes.oneOf(['sm']),
 	block: PropTypes.bool,
 	rounded: PropTypes.bool,
 	toggle: PropTypes.bool,

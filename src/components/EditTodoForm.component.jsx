@@ -19,6 +19,8 @@ import {
 	string,
 } from '../utils';
 import { EditIcon, SunIcon, TrashIcon, SaveIcon } from '../icons';
+import Popup from './common/Popup.component';
+import DeletePrompt from './DeletePrompt.component';
 
 function EditTodoForm() {
 	const { isEditModeActive, toggleEditMode, user } = useAppContext();
@@ -27,6 +29,7 @@ function EditTodoForm() {
 	const [formValues, setFormValues] = useState({});
 	const [isSubmitted, setIsSubmitted] = useState(false);
 	const [errors, setErrors] = useState({});
+	const [isDeletePromptVisible, setIsDeletePromptVisible] = useState(false);
 	const formClassname = getClassName('form--edit-todo bgcolor-light-500', {
 		visible: isEditModeActive,
 	});
@@ -82,11 +85,13 @@ function EditTodoForm() {
 	function handleDelete(id) {
 		deleteTodo(user.uid, id);
 		toggleEditMode();
+		setIsDeletePromptVisible(false);
 	}
 
 	function handleClose() {
 		toggleEditMode();
 		deselectActiveTodo();
+		setIsDeletePromptVisible(false);
 	}
 
 	function validate(formData) {
@@ -162,6 +167,16 @@ function EditTodoForm() {
 						changeHandler={handleToggle}
 					/>
 				</FormGroup>
+				<FormGroup className='py-20'>
+					<FormControl
+						onChange={handleChange}
+						type='text'
+						name='note'
+						placeholder='Add a note'
+						value={formValues.note || ''}
+						textarea
+					/>
+				</FormGroup>
 			</FormContent>
 			<FormFooter className='color-light-800'>
 				{activeTodo.creationDate && (
@@ -180,17 +195,29 @@ function EditTodoForm() {
 					</Icon>
 					<b>Save</b>
 				</Button>
-				<Button
-					{...setTestid('editing-form-delete-button')}
-					onClick={() => handleDelete(activeTodo.id)}
-					variant='text-danger'
-					type='button'
+				<Popup
+					position='left'
+					toggler={
+						<Button
+							{...setTestid('editing-form-delete-button')}
+							onClick={() => setIsDeletePromptVisible(true)}
+							variant='text-danger'
+							type='button'
+							disabled={isDeletePromptVisible}
+						>
+							<Icon inline className='mr-12'>
+								<TrashIcon />
+							</Icon>
+							<b>Delete</b>
+						</Button>
+					}
+					visible={isDeletePromptVisible}
 				>
-					<Icon inline className='mr-12'>
-						<TrashIcon />
-					</Icon>
-					<b>Delete</b>
-				</Button>
+					<DeletePrompt
+						onCancel={() => setIsDeletePromptVisible(false)}
+						onConfirm={() => handleDelete(activeTodo.id)}
+					/>
+				</Popup>
 			</FormFooter>
 		</Form>
 	);

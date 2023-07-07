@@ -1,5 +1,7 @@
 import PropTypes from 'prop-types';
+import Icon from './common/Icon.component';
 import { getClassName, setTestid } from '../utils';
+import { StarFilledIcon, StarIcon } from '../icons';
 
 function TodosItem({
 	id,
@@ -7,7 +9,9 @@ function TodosItem({
 	completed,
 	active,
 	today,
+	important,
 	onToggleComplete,
+	onToggleImportant,
 	...restProps
 }) {
 	function getMetadata() {
@@ -29,7 +33,7 @@ function TodosItem({
 						onChange={() => onToggleComplete(id, !completed)}
 						{...setTestid('todoitem-check-element')}
 						type='checkbox'
-						name='checked'
+						name='completed'
 						checked={completed}
 					/>
 					<div className='form__checkbox-checkmark'></div>
@@ -47,6 +51,21 @@ function TodosItem({
 						{getMetadata()}
 					</small>
 				</div>
+				<label className='todos__important-mark ml-auto'>
+					<input
+						{...setTestid('todoitem-check-important')}
+						onChange={() => onToggleImportant(id, !important)}
+						type='checkbox'
+						name='important'
+						checked={important}
+					/>
+					<Icon size='xl'>
+						<StarFilledIcon />
+					</Icon>
+					<Icon size='xl'>
+						<StarIcon />
+					</Icon>
+				</label>
 			</form>
 		</li>
 	);
@@ -58,7 +77,9 @@ TodosItem.propTypes = {
 	description: PropTypes.string.isRequired,
 	id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
 	onToggleComplete: PropTypes.func.isRequired,
+	onToggleImportant: PropTypes.func.isRequired,
 	today: PropTypes.bool.isRequired,
+	important: PropTypes.bool.isRequired,
 };
 
 export default TodosItem;

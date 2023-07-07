@@ -22,6 +22,12 @@ function ListsContextProvider({ children }) {
 			displayDate: true,
 		},
 		{
+			label: 'important',
+			theme: 'warning',
+			icon: 'star',
+			displayIcon: true,
+		},
+		{
 			label: 'all',
 			theme: 'secondary',
 			icon: 'infinite',

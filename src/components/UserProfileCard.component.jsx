@@ -7,8 +7,8 @@ import { LogoutIcon } from '../icons';
 import { getClassName, accessibleOnClick, setTestid } from '../utils';
 
 function UserProfileCard() {
-	const [isExpanded, setIsExpanded] = useState(false);
 	const { user, logOut } = useAppContext();
+	const [isExpanded, setIsExpanded] = useState(false);
 
 	return (
 		<article

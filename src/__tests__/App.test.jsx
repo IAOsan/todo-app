@@ -16,7 +16,6 @@ import {
 	screen,
 	setupUser,
 	waitFor,
-	waitForElementToBeRemoved,
 } from './test-utils';
 import App from '../App';
 import storageService from '../services/storage.service';
@@ -45,12 +44,16 @@ const editTodoForm = {
 	closeBtn: () => screen.queryByTestId('editing-form-close-button'),
 	descriptionInput: () => screen.queryByPlaceholderText('Description'),
 	addToTodayOpt: () => screen.queryByTestId('editing-form-option-my-day'),
+	noteInput: () => screen.queryByPlaceholderText('Add a note'),
 	saveBtn: () => screen.queryByTestId('editing-form-save-button'),
 	deleteBtn: () => screen.queryByTestId('editing-form-delete-button'),
+	confirmDeleteBtn: () => screen.queryByTestId('delete-confirmation'),
+	cancelDeleteBtn: () => screen.queryByTestId('cancel-confirmation'),
 };
 const navigation = {
 	todayLink: () => screen.queryByRole('link', { name: /today/i }),
 	allLink: () => screen.queryByRole('link', { name: /all/i }),
+	importantLink: () => screen.queryByRole('link', { name: /important/i }),
 	toggler: () => screen.queryByTestId('sidebar-toggler'),
 };
 const signinForm = {
@@ -78,6 +81,7 @@ const profile = {
 	element: () => screen.queryByTestId('profile'),
 	signout: () => screen.queryByTestId('profile-signout'),
 };
+const popup = () => screen.queryByTestId('popup');
 const userCredentials = {
 	username: 'goku',
 	email: 'goku@mail.com',
@@ -338,7 +342,7 @@ describe('<App />', () => {
 			beforeEach(clearTodos);
 			afterAll(storageService.clear);
 
-			it('debería marcar como completada la tarea si aún no lo está al hacer clic en el checkbox de la tarea', async () => {
+			it('should mark the task as complete if it is not already done by clicking the task checkbox', async () => {
 				renderApp();
 
 				await addATodo();
@@ -350,7 +354,7 @@ describe('<App />', () => {
 				expect(itemCheck).toBeChecked();
 			});
 
-			it('debería tachar la descripción de la tarea al marcarla como completada', async () => {
+			it('should cross out the task description when marking it complete', async () => {
 				renderApp();
 
 				await addATodo('todo 1');
@@ -365,7 +369,7 @@ describe('<App />', () => {
 				expect(screen.queryByText('todo 1').tagName).toBe('S');
 			});
 
-			it('debería desmarcar como completada la tarea si ya lo está al hacer clic en el checkbox de la tarea', async () => {
+			it('should unmark the task as completed if it is already done by clicking the task checkbox', async () => {
 				renderApp();
 
 				await addATodo();
@@ -376,6 +380,33 @@ describe('<App />', () => {
 				await user.click(itemCheck);
 
 				expect(itemCheck).not.toBeChecked();
+			});
+		});
+
+		describe('MARK AS IMPORTANT', () => {
+			beforeAll(setUser);
+			beforeEach(clearTodos);
+			afterAll(storageService.clear);
+
+			it("should mark the todo as important if it isn't already by clicking the important checkbox", async () => {
+				renderApp();
+
+				await addATodo();
+				const check = screen.queryByTestId('todoitem-check-important');
+				await user.click(check);
+
+				expect(check).toBeChecked();
+			});
+
+			it('you should unmark the task as important if it already is by clicking the important checkbox', async () => {
+				renderApp();
+
+				await addATodo();
+				const check = screen.queryByTestId('todoitem-check-important');
+				await user.click(check);
+				await user.click(check);
+
+				expect(check).not.toBeChecked();
 			});
 		});
 
@@ -445,6 +476,18 @@ describe('<App />', () => {
 				expect(editTodoForm.addToTodayOpt()).toBeChecked();
 			});
 
+			it('should display todo note when edit form is opened', async () => {
+				renderApp();
+
+				await addATodo();
+				await user.click(screen.queryByText(/new todo added/i));
+				await user.type(editTodoForm.noteInput(), 'this is a note');
+
+				expect(editTodoForm.noteInput()).toHaveTextContent(
+					'this is a note'
+				);
+			});
+
 			it('should display the creation date of the task when the edit form is opened', async () => {
 				const expectedDate = new Date().toLocaleString('en-US', {
 					weekday: 'short',
@@ -505,6 +548,19 @@ describe('<App />', () => {
 				expect(editTodoForm.addToTodayOpt()).not.toBeChecked();
 			});
 
+			it('should be able to change the todo note', async () => {
+				renderApp();
+
+				await addATodo();
+				await user.click(screen.queryByText(/new todo added/i));
+				await user.clear(editTodoForm.noteInput());
+				await user.type(editTodoForm.noteInput(), 'this is a note');
+
+				expect(editTodoForm.noteInput()).toHaveTextContent(
+					'this is a note'
+				);
+			});
+
 			it('should apply the changes to the task when clicking on the save button', async () => {
 				renderApp();
 
@@ -530,26 +586,16 @@ describe('<App />', () => {
 				).not.toContain('visible');
 			});
 
-			it('should delete the task when clicking on the delete button', async () => {
+			it('should display the note when the changes are saved and the edit form is opened again', async () => {
 				renderApp();
 
 				await addATodo('new todo');
 				await user.click(screen.queryByText(/new todo/i));
-				await user.click(editTodoForm.deleteBtn());
-
-				expect(screen.queryByText('new todo')).not.toBeInTheDocument();
-			});
-
-			it('should close the edit form when deleting the task', async () => {
-				renderApp();
-
-				await addATodo('new todo');
+				await user.type(editTodoForm.noteInput(), 'todo note');
+				await user.click(editTodoForm.saveBtn());
 				await user.click(screen.queryByText(/new todo/i));
-				await user.click(editTodoForm.deleteBtn());
 
-				expect(
-					Array.from(editTodoForm.element().classList)
-				).not.toContain('visible');
+				expect(editTodoForm.noteInput()).toHaveTextContent('todo note');
 			});
 
 			it('should close the edit form when clicking on the close button', async () => {
@@ -606,34 +652,6 @@ describe('<App />', () => {
 				).toHaveTextContent(2);
 			});
 
-			it('should update the today todos count after deleting a todo', async () => {
-				renderApp();
-
-				await addATodo('first todo');
-				await addATodo('second todo');
-				await addATodo('third todo');
-				await user.click(screen.queryByText('second todo'));
-				await user.click(editTodoForm.deleteBtn());
-
-				expect(
-					screen.queryByTestId('todos-count-today')
-				).toHaveTextContent(2);
-			});
-
-			it('should update the todos count after deleting a todo', async () => {
-				renderApp();
-
-				await addATodo('first todo');
-				await addATodo('second todo');
-				await addATodo('third todo');
-				await user.click(screen.queryByText('second todo'));
-				await user.click(editTodoForm.deleteBtn());
-
-				expect(
-					screen.queryByTestId('todos-count-all')
-				).toHaveTextContent(2);
-			});
-
 			it('should display an error message if the empty edit form is submitted', async () => {
 				renderApp();
 
@@ -647,6 +665,138 @@ describe('<App />', () => {
 						'"Description" is not allowed to be empty'
 					)
 				).toBeInTheDocument();
+			});
+		});
+
+		describe('DELETE TODOS', () => {
+			beforeAll(setUser);
+			beforeEach(clearTodos);
+			afterAll(storageService.clear);
+
+			it('should not display by default deletion confirmation', async () => {
+				renderApp();
+
+				await addATodo('new todo');
+				await user.click(screen.queryByText(/new todo/i));
+
+				expect(Array.from(popup().classList)).not.toContain('visible');
+			});
+
+			it('should not be disabled delete button by default', async () => {
+				renderApp();
+
+				await addATodo('new todo');
+				await user.click(screen.queryByText(/new todo/i));
+
+				expect(editTodoForm.deleteBtn()).not.toBeDisabled();
+			});
+
+			it('should display deletion confirmation when clicking the delete button', async () => {
+				renderApp();
+
+				await addATodo('new todo');
+				await user.click(screen.queryByText(/new todo/i));
+				await user.click(editTodoForm.deleteBtn());
+
+				expect(Array.from(popup().classList)).toContain('visible');
+			});
+
+			it('should disable delete button when deletion confirmation is visible', async () => {
+				renderApp();
+
+				await addATodo('new todo');
+				await user.click(screen.queryByText(/new todo/i));
+				await user.click(editTodoForm.deleteBtn());
+
+				expect(editTodoForm.deleteBtn()).toBeDisabled();
+			});
+
+			it('should close deletion confirmation if the deletion is canceled', async () => {
+				renderApp();
+
+				await addATodo('new todo');
+				await user.click(screen.queryByText(/new todo/i));
+				await user.click(editTodoForm.deleteBtn());
+				await user.click(editTodoForm.cancelDeleteBtn());
+
+				expect(
+					Array.from(screen.queryByTestId('popup').classList)
+				).not.toContain('visible');
+			});
+
+			it('should enable delete button if the deletion is canceled', async () => {
+				renderApp();
+
+				await addATodo('new todo');
+				await user.click(screen.queryByText(/new todo/i));
+				await user.click(editTodoForm.deleteBtn());
+				await user.click(editTodoForm.cancelDeleteBtn());
+
+				expect(editTodoForm.deleteBtn()).not.toBeDisabled();
+			});
+
+			it('should delete todo if the deletion is confirmed', async () => {
+				renderApp();
+
+				await addATodo('new todo');
+				await user.click(screen.queryByText(/new todo/i));
+				await user.click(editTodoForm.deleteBtn());
+				await user.click(editTodoForm.confirmDeleteBtn());
+
+				expect(screen.queryByText('new todo')).not.toBeInTheDocument();
+			});
+
+			it('should close the edit form when deleting the task', async () => {
+				renderApp();
+
+				await addATodo('new todo');
+				await user.click(screen.queryByText(/new todo/i));
+				await user.click(editTodoForm.deleteBtn());
+				await user.click(editTodoForm.confirmDeleteBtn());
+
+				expect(
+					Array.from(editTodoForm.element().classList)
+				).not.toContain('visible');
+			});
+
+			it('should not show the deletion confirmation if a task is deleted and the edit form is reopened', async () => {
+				renderApp();
+
+				await addATodo('new todo');
+				await addATodo('new todo 2');
+				await user.click(screen.queryByText('new todo'));
+				await user.click(editTodoForm.deleteBtn());
+				await user.click(editTodoForm.confirmDeleteBtn());
+				await user.click(screen.queryByText('new todo'));
+
+				expect(Array.from(popup().classList)).not.toContain('visible');
+			});
+
+			it('should not show the deletion confirmation if the editing form is closed and reopened', async () => {
+				renderApp();
+
+				await addATodo('new todo');
+				await user.click(screen.queryByText('new todo'));
+				await user.click(editTodoForm.deleteBtn());
+				await user.click(editTodoForm.closeBtn());
+				await user.click(screen.queryByText('new todo'));
+
+				expect(Array.from(popup().classList)).not.toContain('visible');
+			});
+
+			it('should update the today todos count after deleting a todo', async () => {
+				renderApp();
+
+				await addATodo('first todo');
+				await addATodo('second todo');
+				await addATodo('third todo');
+				await user.click(screen.queryByText('second todo'));
+				await user.click(editTodoForm.deleteBtn());
+				await user.click(editTodoForm.confirmDeleteBtn());
+
+				expect(
+					screen.queryByTestId('todos-count-today')
+				).toHaveTextContent(2);
 			});
 		});
 	});
@@ -999,6 +1149,114 @@ describe('<App />', () => {
 				await user.click(navigation.todayLink());
 
 				expect(screen.queryByText('todo 1 edited')).toBeInTheDocument();
+			});
+		});
+
+		describe('ROUTE /important', () => {
+			beforeEach(clearTodos);
+
+			it('should display a default message if there are no items in the list for the route', async () => {
+				renderApp();
+
+				await user.click(navigation.importantLink());
+
+				expect(screen.queryByText(/no todos yet/i)).toBeInTheDocument();
+				expect(
+					screen.queryByText(
+						/it looks like it's empty, new tasks you add will appear here/i
+					)
+				).toBeInTheDocument();
+			});
+
+			it('should display zero in the todos count if there is not important todos', async () => {
+				renderApp();
+
+				await addATodo('todo 1');
+
+				expect(
+					screen.queryByTestId('todos-count-important')
+				).toHaveTextContent(0);
+			});
+
+			it('should update todos count when a todo is marked as important', async () => {
+				renderApp();
+
+				await addATodo('todo 1');
+				await addATodo('todo 2');
+				const itemsCheck = screen.queryAllByTestId(
+					'todoitem-check-important'
+				);
+				await user.click(itemsCheck[0]);
+
+				expect(
+					screen.queryByTestId('todos-count-important')
+				).toHaveTextContent(1);
+			});
+
+			it('should update todos count when a todo is unmarked as important', async () => {
+				renderApp();
+
+				await addATodo('todo 1');
+				await addATodo('todo 2');
+				const itemsCheck = screen.queryAllByTestId(
+					'todoitem-check-important'
+				);
+				await user.click(itemsCheck[0]);
+
+				expect(
+					screen.queryByTestId('todos-count-important')
+				).toHaveTextContent(1);
+
+				await user.click(itemsCheck[0]);
+
+				expect(
+					screen.queryByTestId('todos-count-important')
+				).toHaveTextContent(0);
+			});
+
+			it('should display the todos that have been marked as important', async () => {
+				renderApp();
+
+				await addATodo('todo 1');
+				await addATodo('todo 2');
+				await addATodo('todo 3');
+				const itemsCheck = screen.queryAllByTestId(
+					'todoitem-check-important'
+				);
+				await user.click(itemsCheck[0]);
+				await user.click(itemsCheck[1]);
+				await user.click(navigation.importantLink());
+
+				expect(screen.queryAllByTestId('todositem')).toHaveLength(2);
+			});
+
+			it('should display important tasks when reloading the page', async () => {
+				const { rerender } = renderApp();
+
+				await addATodo();
+				await addATodo();
+				await addATodo();
+				await addATodo();
+
+				let checks = screen.queryAllByTestId(
+					'todoitem-check-important'
+				);
+				await user.click(checks[0]);
+				await user.click(checks[1]);
+				await user.click(checks[2]);
+
+				rerender(
+					<MemoryRouter>
+						<AllTheProviders>
+							<App />
+						</AllTheProviders>
+					</MemoryRouter>
+				);
+
+				await user.click(navigation.importantLink());
+				checks = screen.queryAllByTestId('todoitem-check-important');
+
+				expect(screen.queryAllByTestId('todositem')).toHaveLength(3);
 			});
 		});
 	});

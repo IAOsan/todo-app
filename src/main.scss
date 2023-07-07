@@ -455,7 +455,7 @@ hr {
 	padding: pxToRem(12) pxToRem(36);
 	transition: background-color var(--tr-time) ease, color var(--tr-time) ease,
 		box-shadow var(--tr-time) ease;
-	&:hover {
+	&:hover:not(:disabled) {
 		background-color: var(--hoverBgColor);
 		color: var(--hoverColor);
 	}
@@ -465,8 +465,12 @@ hr {
 	&:not(:focus-visible) {
 		box-shadow: unset;
 	}
-	&:active {
+	&:active:not(:disabled) {
 		background-color: var(--activeBgColor);
+	}
+	&:disabled {
+		cursor: not-allowed;
+		opacity: 0.6;
 	}
 	&--info {
 		--hoverBgColor: var(--c-info-600);
@@ -514,6 +518,10 @@ hr {
 		padding: pxToRem(12) pxToRem(16);
 		background-color: transparent;
 		line-height: 1;
+	}
+	&--sm {
+		padding: pxToRem(8) pxToRem(32);
+		font-size: var(--text-sm);
 	}
 	&--close {
 		position: absolute;
@@ -880,6 +888,54 @@ hr {
 	background-color: rgba(255, 255, 255, 0.9);
 	z-index: var(--zindex-highest);
 }
+.popup {
+	position: relative;
+	display: inline-block;
+	cursor: pointer;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	/* The actual popup */
+	&__content {
+		background-color: var(--c-light-500);
+		box-shadow: var(--elevation-1);
+		color: var(--c-dark-500);
+		text-align: center;
+		border-radius: var(--borderadius);
+		padding: pxToRem(12);
+		position: absolute;
+		bottom: 100%;
+		left: 50%;
+		opacity: 0;
+		transform: translateX(-50%);
+		transition: opacity var(--tr-time) ease, visibility var(--tr-time) ease,
+			bottom var(--tr-time) ease;
+		visibility: hidden;
+		z-index: var(--zindex-high);
+		/* Popup arrow */
+		&::after {
+			content: '';
+			position: absolute;
+			top: 100%;
+			left: 50%;
+			margin-left: pxToRem(-12);
+			border-width: pxToRem(12);
+			border-style: solid;
+			border-color: var(--c-light-500) transparent transparent transparent;
+		}
+	}
+	&--left &__content {
+		left: 12%;
+		transform: translateX(-50%);
+	}
+	/* Toggle this class - hide and show the popup */
+	&.visible &__content {
+		bottom: 136%;
+		opacity: 1;
+		visibility: visible;
+	}
+}
 .todos {
 	height: 100vh;
 	position: relative;
@@ -1241,41 +1297,63 @@ hr {
 }
 
 @include respond(1024) {
-	.sidebar {
-		width: 28vw;
-	}
 	.form {
 		&--edit-todo {
-			width: 32vw;
+			width: pxToRem(375);
 			border-left: pxToRem(2) solid var(--c-light-600);
 		}
 	}
 	.todos {
-		margin-left: 28vw;
-		width: calc(100vw - 28vw);
+		margin-left: pxToRem(320);
+		width: calc(100vw - pxToRem(320));
 		&--edit-mode {
-			width: calc(100vw - 60vw);
+			width: calc(100vw - pxToRem(695));
 		}
 	}
 }
 
 @include respond(1200) {
 	:root {
-		--text-base-size: 62.5%; //18
+		--text-base-size: 59.0277%; //17
 	}
+	// layout
 	.sidebar {
-		width: 25vw;
+		width: calc(pxToRem(375) + 1vw);
 	}
+	// components
 	.form {
 		&--edit-todo {
-			width: 25vw;
+			width: calc(pxToRem(375) + 1vw);
 		}
 	}
 	.todos {
-		margin-left: 25vw;
-		width: calc(100vw - 25vw);
+		margin-left: calc(pxToRem(375) + 1vw);
+		width: calc(100vw - (pxToRem(375) + 1vw));
 		&--edit-mode {
-			width: calc(100vw - 50vw);
+			width: calc(100vw - (pxToRem(375) + 1vw) * 2);
+		}
+	}
+}
+
+@include respond(1600) {
+	:root {
+		--text-base-size: 65.05%; //18
+	}
+	// layout
+	.sidebar {
+		width: calc(pxToRem(375) + 1.5vw);
+	}
+	// components
+	.form {
+		&--edit-todo {
+			width: calc(pxToRem(375) + 1.5vw);
+		}
+	}
+	.todos {
+		margin-left: calc(pxToRem(375) + 1.5vw);
+		width: calc(100vw - (pxToRem(375) + 1.5vw));
+		&--edit-mode {
+			width: calc(100vw - (pxToRem(375) + 1.5vw) * 2);
 		}
 	}
 }
